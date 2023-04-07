@@ -8,6 +8,11 @@ Usage:
 """
 import os
 import inspect
+import sqlite3
+from datetime import datetime
+from faker import Faker
+
+fake = Faker("en_CA")
 
 def main():
     global db_path
@@ -17,11 +22,10 @@ def main():
 
 def create_people_table():
     """Creates the people table in the database"""
-    import sqlite3
 # Open a connection to the database.
-    con = sqlite3.connect('social_network.db')
+    con = sqlite3.connect(db_path)
 # Get a Cursor object that can be used to run SQL queries on the database.
-    cur = con.cursor(db_path)
+    cur = con.cursor()
 # Define an SQL query that creates a table named 'people'.
 # Each row in this table will hold information about a specific person.
     create_ppl_tbl_query = """
@@ -54,9 +58,44 @@ def create_people_table():
 
 def populate_people_table():
     """Populates the people table with 200 fake people"""
-    
-    
     # TODO: Create function body
+    conn = sqlite3.connect(db_path)
+
+    cur = conn.cursor()
+
+    add_person_query = """
+        INSERT INFO people
+        (
+            name,
+            email,
+            address,
+            city,
+            province,
+            bio,
+            age,
+            created_at,
+            updated_at
+        
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+    """
+    for _ in range(200):
+        person_data = (
+            fake.name(),
+            fake.email(),
+            fake.street_address(),
+            fake.city(),
+            fake.provience(),
+            fake.sentence(),
+            fake.random_int(1, 100),
+            datetime.now(),
+            datetime.now()
+        )
+        cur.execute(add_person_query, person_data)
+
+    conn.commit()
+    conn.close()
+    
     return
 
 def get_script_dir():
